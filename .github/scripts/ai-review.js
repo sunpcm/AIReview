@@ -73,12 +73,24 @@ async function run() {
 			const response = await openai.chat.completions.create({
 				model: "gemini-3-pro-preview", // 使用 mini 模型比较便宜，效果够用
 				messages: [{ role: "user", content: prompt }],
-				response_format: { type: "json_object" }, // 强制 JSON
 				max_tokens: 500,
 			});
 			
-			const content = response.choices[0].message.content;
-			// 容错处理，有时候模型返回 { "reviews": [...] }，有时候直接返回 [...]
+			// 🔍 DEBUG: 打印原始返回，以此排查是否被安全策略拦截
+			console.log(`DEBUG [${file.filename}]:`, JSON.stringify(response.choices[0], null, 2));
+			
+			let content = response.choices[0].message.content;
+			
+			// 🛡️ 防御 1: 如果内容为空（可能被安全拦截）
+			if (!content) {
+				console.log(`⚠️ ${file.filename} API返回内容为空 (可能触发了 Safety Filter)`);
+				continue;
+			}
+			
+			// 🛡️ 防御 2: 清洗 Gemini 喜欢加的 Markdown 标记 (```json ... ```)
+			// 这一步非常关键！Gemini 几乎 100% 会带这个
+			content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+			
 			const result = JSON.parse(content);
 			const reviews = Array.isArray(result) ? result : (result.reviews || []);
 			
@@ -91,7 +103,11 @@ async function run() {
 			await postComments(file, reviews);
 			
 		} catch (error) {
-			console.error(`❌ 分析 ${file.filename} 失败:`, error);
+			// 打印 content 里的具体报错位置，方便调试
+			console.error(`❌ 分析 ${file.filename} 失败:`, error.message);
+			if (error instanceof SyntaxError) {
+				console.error("解析失败的原始内容:", response?.choices[0]?.message?.content);
+			}
 		}
 	}
 }
