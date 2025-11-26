@@ -77,7 +77,8 @@ async function run() {
 			});
 			
 			// 🔍 DEBUG: 打印原始返回，以此排查是否被安全策略拦截
-			console.log(`DEBUG [${file.filename}]:`, JSON.stringify(response.choices[0], null, 2));
+			console.log(`DEBUG x-ai/grok-4.1-fast:free [${file.filename}]:`, JSON.stringify(response.choices[0], null, 2));
+
 			
 			let content = response.choices[0].message.content;
 			
