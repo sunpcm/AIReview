@@ -71,7 +71,7 @@ async function run() {
 		// 4. 调用 OpenAI
 		try {
 			const response = await openai.chat.completions.create({
-				model: "gemini-3-pro-preview", // 使用 mini 模型比较便宜，效果够用
+				model: "x-ai/grok-4.1-fast:free", // 使用 mini 模型比较便宜，效果够用
 				messages: [{ role: "user", content: prompt }],
 				max_tokens: 500,
 			});
