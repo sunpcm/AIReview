@@ -7,6 +7,7 @@ const parseDiff = require("parse-diff");
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const API_BASE_URL = process.env.API_BASE_URL;
+const API_MODEL = process.env.API_MODEL;
 
 const octokit = github.getOctokit(GITHUB_TOKEN);
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY, baseURL: API_BASE_URL });
@@ -71,14 +72,13 @@ async function run() {
 		// 4. 调用 OpenAI
 		try {
 			const response = await openai.chat.completions.create({
-				model: "x-ai/grok-4.1-fast:free", // 使用 mini 模型比较便宜，效果够用
+				model: API_MODEL,
 				messages: [{ role: "user", content: prompt }],
 				max_tokens: 500,
 			});
 			
 			// 🔍 DEBUG: 打印原始返回，以此排查是否被安全策略拦截
-			console.log(`DEBUG x-ai/grok-4.1-fast:free [${file.filename}]:`, JSON.stringify(response.choices[0], null, 2));
-
+			console.log(`Checking [${file.filename}] with ${API_MODEL}`);
 			
 			let content = response.choices[0].message.content;
 			

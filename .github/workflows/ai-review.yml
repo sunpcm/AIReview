@@ -29,4 +29,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # 你设置的 Secrets
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          API_MODEL: ${{ secrets.API_MODEL }}
         run: node .github/scripts/ai-review.js
