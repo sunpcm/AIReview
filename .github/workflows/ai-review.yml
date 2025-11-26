@@ -1,0 +1,31 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize] # PR 创建或更新时触发
+
+permissions:
+  contents: read
+  pull-requests: write # 必须有写入 PR 评论的权限
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        # 我们临时安装依赖，不需要将 node_modules 提交到仓库
+        run: npm install openai @actions/github parse-diff
+
+      - name: Run AI Review Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # 你设置的 Secrets
+        run: node .github/scripts/ai-review.js
